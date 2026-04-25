@@ -1,0 +1,16 @@
+device,step,users
+desktop,add_to_cart,1236
+desktop,checkout,697
+desktop,purchase,558
+desktop,signup,1884
+desktop,visit,2542
+mobile,add_to_cart,1142
+mobile,checkout,316
+mobile,purchase,147
+mobile,signup,2571
+mobile,visit,4822
+tablet,add_to_cart,234
+tablet,checkout,94
+tablet,purchase,65
+tablet,signup,423
+tablet,visit,636

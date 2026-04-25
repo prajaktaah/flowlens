@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowLens — Funnel Intelligence Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #09090F;
+    --surface:   #111118;
+    --surface2:  #18181F;
+    --border:    rgba(255,255,255,0.07);
+    --primary:   #4F8EF7;
+    --accent:    #FF6B35;
+    --green:     #22D39A;
+    --red:       #FF4757;
+    --yellow:    #FFD93D;
+    --purple:    #A78BFA;
+    --text:      #F1F1F5;
+    --muted:     #8A8A9A;
+    --card-glow: 0 0 0 1px var(--border), 0 4px 32px rgba(0,0,0,0.5);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Noise overlay ─────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* ─── Header ─────────────────────────────── */
+  header {
+    padding: 20px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(9,9,15,0.85);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .header-meta {
+    display: flex; gap: 24px; align-items: center;
+  }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(34,211,154,0.1);
+    border: 1px solid rgba(34,211,154,0.25);
+    color: var(--green);
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .period-label { font-size: 12px; color: var(--muted); }
+
+  /* ─── Main layout ─────────────────────────── */
+  main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+
+  /* ─── Section headers ─────────────────────── */
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ─── KPI Row ─────────────────────────────── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--card-glow);
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative; overflow: hidden;
+  }
+
+  .kpi-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent-color, var(--primary));
+    opacity: 0.7;
+  }
+
+  .kpi-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); }
+
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+  .kpi-sub { font-size: 12px; color: var(--muted); }
+  .kpi-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600;
+  }
+  .badge-up { background: rgba(34,211,154,0.15); color: var(--green); }
+  .badge-dn { background: rgba(255,71,87,0.15); color: var(--red); }
+  .badge-warn { background: rgba(255,217,61,0.15); color: var(--yellow); }
+
+  /* ─── Grid layouts ─────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+  .grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+  /* ─── Cards ────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--card-glow);
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .card-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 6px;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+
+  /* ─── Funnel Visual ──────────────────────────── */
+  .funnel-visual { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+
+  .funnel-step {
+    display: flex; align-items: center; gap: 12px;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+
+  .funnel-bar-wrap {
+    flex: 1; height: 44px; background: var(--surface2); border-radius: 8px; overflow: hidden;
+    position: relative;
+  }
+
+  .funnel-bar-fill {
+    height: 100%; border-radius: 8px;
+    transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+    display: flex; align-items: center; padding-left: 14px;
+    font-size: 13px; font-weight: 600; color: #fff;
+    white-space: nowrap;
+  }
+
+  .funnel-step-name { width: 100px; font-size: 12px; color: var(--muted); text-align: right; flex-shrink: 0; }
+  .funnel-step-num  { width: 70px; font-size: 13px; font-weight: 600; text-align: right; flex-shrink: 0; }
+
+  .drop-arrow {
+    text-align: center; font-size: 11px; color: var(--red);
+    padding: 2px 0;
+    display: flex; align-items: center; justify-content: flex-start;
+    gap: 8px; padding-left: 114px;
+  }
+
+  .drop-pill {
+    background: rgba(255,71,87,0.12); border: 1px solid rgba(255,71,87,0.25);
+    color: var(--red); border-radius: 20px;
+    padding: 2px 10px; font-size: 11px; font-weight: 600;
+  }
+
+  /* ─── Segment tabs ───────────────────────────── */
+  .tab-row {
+    display: flex; gap: 6px; margin-bottom: 18px;
+  }
+
+  .tab-btn {
+    padding: 6px 14px; border-radius: 8px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .tab-btn.active, .tab-btn:hover {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+  }
+
+  /* ─── Insight cards ──────────────────────────── */
+  .insight-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .insight-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+
+  .insight-icon {
+    font-size: 20px; line-height: 1; flex-shrink: 0; margin-top: 2px;
+  }
+
+  .insight-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .insight-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .sev-high   { border-left: 3px solid var(--red); }
+  .sev-med    { border-left: 3px solid var(--yellow); }
+  .sev-low    { border-left: 3px solid var(--green); }
+
+  /* ─── Reco cards ─────────────────────────────── */
+  .reco-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  .reco-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .reco-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .reco-priority { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+  .p1 { color: var(--red); }
+  .p2 { color: var(--yellow); }
+  .p3 { color: var(--primary); }
+
+  .reco-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .reco-impact { font-size: 12px; color: var(--green); font-weight: 500; }
+  .reco-desc { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  /* ─── Mini table ────────────────────────────── */
+  .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mini-table th { color: var(--muted); font-size: 11px; font-weight: 500; text-align: left; padding: 6px 0; border-bottom: 1px solid var(--border); letter-spacing: 0.5px; }
+  .mini-table td { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+  .mini-table tr:last-child td { border-bottom: none; }
+
+  .bar-inline { height: 6px; border-radius: 3px; background: var(--primary); display: inline-block; vertical-align: middle; }
+
+  /* ─── Time series ────────────────────────────── */
+  canvas { display: block; }
+
+  /* ─── Alert band ─────────────────────────────── */
+  .alert-band {
+    background: linear-gradient(90deg, rgba(255,71,87,0.08), rgba(255,71,87,0.04));
+    border: 1px solid rgba(255,71,87,0.2);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex; gap: 12px; align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .alert-band .icon { font-size: 20px; flex-shrink: 0; }
+  .alert-band strong { color: var(--red); }
+  .alert-band p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* ─── Footer ─────────────────────────────────── */
+  footer {
+    text-align: center; padding: 32px; color: var(--muted);
+    font-size: 12px; border-top: 1px solid var(--border); margin-top: 16px;
+  }
+
+  footer span { color: var(--primary); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔭</div>
+    FlowLens
+  </div>
+  <div class="header-meta">
+    <div class="live-badge"><div class="live-dot"></div> LIVE</div>
+    <div class="period-label">Jan 1 – Jun 30, 2024 &nbsp;·&nbsp; E-Commerce Platform</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Alert Band -->
+  <div class="alert-band">
+    <div class="icon">⚠️</div>
+    <div>
+      <strong>Critical Drop-Off Detected</strong>
+      <p>57.6% of users abandon between Add to Cart → Checkout — costing an estimated <strong style="color:var(--yellow)">₹18.4L</strong> in monthly lost revenue.</p>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="section-label">Key Performance Indicators</div>
+  <div class="kpi-row">
+    <div class="kpi-card" style="--accent-color: var(--primary)">
+      <div class="kpi-label">Total Visitors</div>
+      <div class="kpi-value" style="color:var(--primary)">8,000</div>
+      <div class="kpi-sub">Jan – Jun 2024</div>
+    </div>
+    <div class="kpi-card" style="--accent-color: var(--green)">
+      <div class="kpi-label">Total Purchasers</div>
+      <div class="kpi-value" style="color:var(--green)">770</div>
+      <div class="kpi-sub"><span class="kpi-badge badge-dn">↓ vs target</span></div>
+    </div>
+    <div class="kpi-card" style="--accent-color: var(--accent)">
+      <div class="kpi-label">Overall CVR</div>
+      <div class="kpi-value" style="color:var(--accent)">9.6%</div>
+      <div class="kpi-sub">Industry avg: 14.2%</div>
+    </div>
+    <div class="kpi-card" style="--accent-color: var(--red)">
+      <div class="kpi-label">Biggest Drop</div>
+      <div class="kpi-value" style="color:var(--red)">57.6%</div>
+      <div class="kpi-sub">Cart → Checkout</div>
+    </div>
+    <div class="kpi-card" style="--accent-color: var(--yellow)">
+      <div class="kpi-label">Revenue at Risk</div>
+      <div class="kpi-value" style="color:var(--yellow)">1,505</div>
+      <div class="kpi-sub">Users lost at checkout</div>
+    </div>
+  </div>
+
+  <!-- Funnel + Insights -->
+  <div class="grid-main">
+
+    <!-- Funnel -->
+    <div class="card">
+      <div class="card-title">
+        Conversion Funnel
+        <span class="card-tag">Overall</span>
+      </div>
+      <div class="funnel-visual" id="funnelViz"></div>
+    </div>
+
+    <!-- Key Insights -->
+    <div class="card">
+      <div class="card-title">Root-Cause Insights <span class="card-tag">AI-Detected</span></div>
+      <div class="insight-list">
+        <div class="insight-item sev-high">
+          <div class="insight-icon">📱</div>
+          <div>
+            <div class="insight-title">Mobile UX Crisis</div>
+            <div class="insight-desc">60% of traffic comes via mobile, but mobile CVR is only 3.0% vs desktop's 22%. That's a 7× gap costing massive revenue daily.</div>
+          </div>
+        </div>
+        <div class="insight-item sev-high">
+          <div class="insight-icon">🛒</div>
+          <div>
+            <div class="insight-title">Checkout Friction (Biggest Leak)</div>
+            <div class="insight-desc">57.6% of users drop at checkout. Likely caused by forced account creation, complex payment flow, or surprise costs.</div>
+          </div>
+        </div>
+        <div class="insight-item sev-med">
+          <div class="insight-icon">📣</div>
+          <div>
+            <div class="insight-title">Paid Ad Targeting Mismatch</div>
+            <div class="insight-desc">25% of traffic comes from paid ads but CVR is only 4.2%. Budget is being wasted on low-intent audiences.</div>
+          </div>
+        </div>
+        <div class="insight-item sev-low">
+          <div class="insight-icon">🎯</div>
+          <div>
+            <div class="insight-title">Best Segment: 25–44, Email</div>
+            <div class="insight-desc">Email channel (20.5% CVR) and 25–44 age group (12.9% CVR) are your highest-quality segments. Double down here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid-2">
+
+    <!-- Drop-off chart -->
+    <div class="card">
+      <div class="card-title">Drop-off Rate by Transition <span class="card-tag">%</span></div>
+      <canvas id="dropChart" height="200"></canvas>
+    </div>
+
+    <!-- Segment CVR -->
+    <div class="card">
+      <div class="card-title">
+        CVR by Segment
+        <div class="tab-row" style="margin-bottom:0">
+          <button class="tab-btn active" onclick="switchSeg('device',this)">Device</button>
+          <button class="tab-btn" onclick="switchSeg('channel',this)">Channel</button>
+          <button class="tab-btn" onclick="switchSeg('age',this)">Age</button>
+        </div>
+      </div>
+      <canvas id="segChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Table + Recommendations -->
+  <div class="grid-2">
+
+    <!-- Country table -->
+    <div class="card">
+      <div class="card-title">CVR by Country <span class="card-tag">Top 7</span></div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>Visitors</th>
+            <th>CVR</th>
+            <th style="width:100px">Bar</th>
+          </tr>
+        </thead>
+        <tbody id="countryTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card">
+      <div class="card-title">Prioritised Recommendations <span class="card-tag">4 Actions</span></div>
+      <div class="reco-grid">
+        <div class="reco-card">
+          <div class="reco-header">
+            <div class="reco-priority p1">🔴 Priority 1</div>
+          </div>
+          <div class="reco-title">Fix Mobile Checkout</div>
+          <div class="reco-impact">+8–12% CVR uplift</div>
+          <div class="reco-desc">Add one-tap payments (UPI/Google Pay), simplify forms, add progress indicator.</div>
+        </div>
+        <div class="reco-card">
+          <div class="reco-header">
+            <div class="reco-priority p1">🔴 Priority 2</div>
+          </div>
+          <div class="reco-title">Enable Guest Checkout</div>
+          <div class="reco-impact">+5–8% CVR uplift</div>
+          <div class="reco-desc">Remove forced sign-up before purchase. Capture email post-purchase instead.</div>
+        </div>
+        <div class="reco-card">
+          <div class="reco-header">
+            <div class="reco-priority p2">🟡 Priority 3</div>
+          </div>
+          <div class="reco-title">Refine Paid Targeting</div>
+          <div class="reco-impact">15–20% CAC reduction</div>
+          <div class="reco-desc">Shift budget from low-intent paid ads to email & organic (3× better CVR).</div>
+        </div>
+        <div class="reco-card">
+          <div class="reco-header">
+            <div class="reco-priority p3">🔵 Priority 4</div>
+          </div>
+          <div class="reco-title">Abandoned Cart Recovery</div>
+          <div class="reco-impact">+3–5% revenue recovery</div>
+          <div class="reco-desc">Trigger email within 1h of cart abandonment with 10% limited-time offer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly trend -->
+  <div class="card">
+    <div class="card-title">Monthly Conversion Rate Trend — Jan to Jun 2024 <span class="card-tag">Time Series</span></div>
+    <canvas id="trendChart" height="100"></canvas>
+  </div>
+
+</main>
+
+<footer>
+  <p>FlowLens · User Journey Funnel Intelligence Platform · <span>Built with Python + Data Science</span></p>
+  <p style="margin-top:6px">Dataset: 8,000 synthetic users · 17,367 events · Jan–Jun 2024</p>
+</footer>
+
+<script>
+// ─── Data ────────────────────────────────────────────────────────────────────
+const funnelData = [
+  { step: "Visit",        users: 8000,  pct: 100.0, color: "#4F8EF7" },
+  { step: "Sign Up",      users: 4878,  pct: 61.0,  color: "#A78BFA" },
+  { step: "Add to Cart",  users: 2612,  pct: 32.6,  color: "#FFD93D" },
+  { step: "Checkout",     users: 1107,  pct: 13.8,  color: "#FF6B35" },
+  { step: "Purchase",     users: 770,   pct: 9.6,   color: "#22D39A" },
+];
+
+const dropData = {
+  labels: ["Visit→Signup", "Signup→Cart", "Cart→Checkout", "Checkout→Purchase"],
+  values: [39.0, 46.5, 57.6, 30.4],
+};
+
+const segData = {
+  device:  { labels: ["Mobile", "Tablet", "Desktop"],              values: [3.0, 10.2, 22.0] },
+  channel: { labels: ["Paid Ads", "Social", "Referral", "Organic", "Direct", "Email"], values: [4.2, 5.5, 9.9, 11.6, 14.7, 20.5] },
+  age:     { labels: ["18–24", "55+", "45–54", "25–34", "35–44"], values: [4.0, 4.9, 8.0, 12.9, 12.9] },
+};
+
+const countryData = [
+  { country: "Australia",  visitors: 560,  cvr: 14.1 },
+  { country: "USA",        visitors: 2000, cvr: 13.2 },
+  { country: "Canada",     visitors: 560,  cvr: 12.5 },
+  { country: "Germany",    visitors: 640,  cvr: 11.6 },
+  { country: "UK",         visitors: 960,  cvr: 10.9 },
+  { country: "Singapore",  visitors: 480,  cvr: 10.2 },
+  { country: "India",      visitors: 2800, cvr: 6.4  },
+];
+
+const monthlyTrend = {
+  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+  purchase: [7.8, 8.4, 9.1, 10.2, 10.8, 11.3],
+  signup:   [58,  59,  61,  63,   64,   63  ],
+};
+
+// ─── Chart defaults ───────────────────────────────────────────────────────────
+Chart.defaults.color = "#8A8A9A";
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 12;
+
+const gridColor = "rgba(255,255,255,0.05)";
+
+// ─── Funnel Viz ───────────────────────────────────────────────────────────────
+function buildFunnel() {
+  const container = document.getElementById("funnelViz");
+  const maxW = 100;
+
+  funnelData.forEach((d, i) => {
+    const w = d.pct;
+
+    // Bar row
+    const row = document.createElement("div");
+    row.className = "funnel-step";
+    row.style.animationDelay = `${i * 0.1}s`;
+    row.innerHTML = `
+      <div class="funnel-step-name">${d.step}</div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar-fill" style="width:0%;background:${d.color}" data-w="${w}">
+          ${d.users.toLocaleString()} users
+        </div>
+      </div>
+      <div class="funnel-step-num">${d.pct}%</div>
+    `;
+    container.appendChild(row);
+
+    // Drop arrow (not after last)
+    if (i < funnelData.length - 1) {
+      const drop = ((1 - funnelData[i+1].users / d.users) * 100).toFixed(1);
+      const arrow = document.createElement("div");
+      arrow.className = "drop-arrow";
+      arrow.innerHTML = `<span class="drop-pill">▼ ${drop}% dropped here</span>`;
+      container.appendChild(arrow);
+    }
+  });
+
+  // Animate bars after paint
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".funnel-bar-fill").forEach(el => {
+      el.style.width = el.dataset.w + "%";
+    });
+  });
+}
+
+// ─── Drop-off Chart ───────────────────────────────────────────────────────────
+const dropCtx = document.getElementById("dropChart").getContext("2d");
+const dropColors = dropData.values.map(v => v > 50 ? "#FF4757" : v > 40 ? "#FFD93D" : "#22D39A");
+
+const dropChart = new Chart(dropCtx, {
+  type: "bar",
+  data: {
+    labels: dropData.labels,
+    datasets: [{
+      label: "Drop-off %",
+      data: dropData.values,
+      backgroundColor: dropColors,
+      borderRadius: 8,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: { label: ctx => ` ${ctx.raw}% drop-off` }
+      }
+    },
+    scales: {
+      x: { grid: { color: gridColor } },
+      y: { grid: { color: gridColor }, ticks: { callback: v => v + "%" }, max: 70 }
+    }
+  }
+});
+
+// ─── Segment Chart ────────────────────────────────────────────────────────────
+const segCtx = document.getElementById("segChart").getContext("2d");
+let segChart = null;
+
+function buildSegChart(key) {
+  if (segChart) segChart.destroy();
+  const d = segData[key];
+  const colors = d.values.map((v, i) => `hsl(${210 + i * 35}, 80%, 60%)`);
+  segChart = new Chart(segCtx, {
+    type: "bar",
+    data: {
+      labels: d.labels,
+      datasets: [{
+        label: "CVR %",
+        data: d.values,
+        backgroundColor: colors,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { callback: v => v + "%" } },
+        y: { grid: { color: gridColor } }
+      }
+    }
+  });
+}
+
+function switchSeg(key, btn) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  buildSegChart(key);
+}
+
+// ─── Country Table ────────────────────────────────────────────────────────────
+function buildCountryTable() {
+  const tbody = document.getElementById("countryTableBody");
+  const maxCvr = Math.max(...countryData.map(d => d.cvr));
+  countryData.forEach(d => {
+    const barW = Math.round(d.cvr / maxCvr * 90);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${d.country}</td>
+      <td>${d.visitors.toLocaleString()}</td>
+      <td style="font-weight:600;color:${d.cvr > 12 ? 'var(--green)' : d.cvr > 8 ? 'var(--yellow)' : 'var(--muted)'}">${d.cvr}%</td>
+      <td><div class="bar-inline" style="width:${barW}px;background:var(--primary)"></div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── Trend Chart ──────────────────────────────────────────────────────────────
+const trendCtx = document.getElementById("trendChart").getContext("2d");
+new Chart(trendCtx, {
+  type: "line",
+  data: {
+    labels: monthlyTrend.labels,
+    datasets: [
+      {
+        label: "Purchase CVR %",
+        data: monthlyTrend.purchase,
+        borderColor: "#22D39A",
+        backgroundColor: "rgba(34,211,154,0.08)",
+        pointBackgroundColor: "#22D39A",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        yAxisID: "y",
+      },
+      {
+        label: "Signup CVR %",
+        data: monthlyTrend.signup,
+        borderColor: "#4F8EF7",
+        backgroundColor: "rgba(79,142,247,0.06)",
+        pointBackgroundColor: "#4F8EF7",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        yAxisID: "y2",
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: {
+        labels: { color: "#8A8A9A", boxWidth: 12, padding: 16 }
+      }
+    },
+    scales: {
+      x: { grid: { color: gridColor } },
+      y: {
+        type: "linear", position: "left",
+        grid: { color: gridColor },
+        ticks: { callback: v => v + "%" },
+        title: { display: true, text: "Purchase CVR", color: "#22D39A" }
+      },
+      y2: {
+        type: "linear", position: "right",
+        grid: { drawOnChartArea: false },
+        ticks: { callback: v => v + "%" },
+        title: { display: true, text: "Signup CVR", color: "#4F8EF7" }
+      }
+    }
+  }
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+buildFunnel();
+buildSegChart("device");
+buildCountryTable();
+</script>
+</body>
+</html>

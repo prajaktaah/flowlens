@@ -1,0 +1,6 @@
+step,users,step_order,drop_from_prev,conv_from_prev,conv_from_top
+visit,8000,1,3122,,100.0
+signup,4878,2,2266,61.0,61.0
+add_to_cart,2612,3,1505,53.5,32.6
+checkout,1107,4,337,42.4,13.8
+purchase,770,5,0,69.6,9.6
