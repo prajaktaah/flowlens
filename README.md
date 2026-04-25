@@ -1,218 +1,155 @@
-# 🔭 FlowLens — Funnel Intelligence Platform (v2.0)
+FlowLens — Funnel Intelligence Platform (v2.1)
 
-> **A production-style analytics dashboard that detects revenue leaks, explains why users drop, and simulates how to recover lost revenue.**
+A production-style analytics platform designed to identify conversion bottlenecks, analyze user behavior across funnel stages, and support data-driven decision-making through structured insights and visualization.
 
----
+Live Application
 
-## 🌐 Live App
+(Add deployment link here)
 
-👉 *(Add your deployed link here after using Streamlit Cloud)*
+Problem Statement
 
----
+Digital businesses frequently experience significant user drop-off across the conversion funnel:
 
-## 🧩 Problem Statement
+Visit → Signup → Add to Cart → Checkout → Purchase
 
-Every digital business faces the same silent issue:
+Industry data suggests that a large percentage of users abandon the journey before completing a purchase, leading to substantial revenue loss. However, organizations often lack clarity on:
 
-> Users visit → explore → add to cart → and then disappear.
+Where users drop off in the funnel
+Which user segments underperform
+What factors contribute to low conversion
+Which actions can effectively improve outcomes
+Solution Overview
 
-Globally, **~70% of carts are abandoned**, leading to massive revenue loss.
-However, most teams lack clarity on:
+FlowLens is an end-to-end funnel analytics system that:
 
-* Where users drop off
-* Which segments are underperforming
-* Why conversion fails
-* What actions will actually improve revenue
+Tracks user progression across funnel stages
+Identifies critical drop-off points
+Performs segment-level conversion analysis
+Generates interpretable insights
+Recommends business actions to improve conversion
 
----
+The platform combines SQL-based data processing with Python-based analytics and visualization to simulate a real-world analytics workflow.
 
-## 🎯 Solution — FlowLens
+Key Features
+Funnel Analysis Dashboard
+Stage-wise user tracking from visit to purchase
+Conversion rate and drop-off calculation at each step
+Identification of the most critical leakage points
+Segment-Level Analysis
 
-FlowLens is an **end-to-end funnel intelligence platform** that:
+Conversion Rate (CVR) analysis across:
 
-* Tracks user movement across funnel stages
-* Identifies **critical drop-off points**
-* Analyzes **conversion by segment**
-* Generates **data-driven insights**
-* Simulates **revenue impact of improvements**
+Device type
+Marketing channel
+Age group
+Geographic region
 
----
+This enables comparison between high-performing and underperforming segments.
 
-## ⚡ Key Features
+Insight Generation
 
-### 📊 Interactive Funnel Dashboard
+The system identifies key behavioral patterns such as:
 
-* Step-by-step conversion analysis (Visit → Purchase)
-* Visual funnel + drop-off severity tracking
-* Real-time filtering (device, channel, age, country)
+Conversion gaps between devices
+Funnel bottlenecks (especially at checkout stage)
+Low-performing acquisition channels
 
-### 🔍 Segment Intelligence
+Insights are structured for business interpretation rather than raw reporting.
 
-* Conversion Rate (CVR) by:
+Recommendation Framework
 
-  * Device
-  * Marketing Channel
-  * Age Group
-  * Country
-* Highlights high-performing vs leaking segments
+Provides prioritized business actions based on observed patterns, such as:
 
-### 🧠 Automated Insights Engine
+Improving mobile checkout experience
+Enabling guest checkout
+Optimizing marketing channel allocation
 
-* Detects:
+Each recommendation is aligned with measurable business impact.
 
-  * Mobile vs Desktop performance gaps
-  * Checkout bottlenecks
-  * Low-quality traffic sources
-* Presents **human-readable insights**
+Data and Methodology
+Dataset
+Approximately 8,000 users
+Over 17,000 event records
+Time period: January to June 2024
 
-### 💡 Recommendation System
+The dataset simulates realistic user behavior, including:
 
-* Prioritized actions ranked by:
+Device usage patterns
+Channel-based intent differences
+Demographic variation in conversion
+Sequential user journeys
+Technical Approach
+Data Processing
 
-  * Impact on CVR
-  * Business ROI
-* Example:
+Raw event-level data is processed using SQL via SQLite.
 
-  * Fix mobile checkout
-  * Enable guest checkout
-  * Shift ad budget → email
+Key operations include:
 
-### 🧮 Revenue Impact Simulator
+Aggregating stage-wise user counts
+Computing conversion rates
+Performing segment-level grouping
+Analytics Layer
 
-* Models revenue uplift from:
+Python (Pandas and NumPy) is used for:
 
-  * Checkout improvements
-  * Mobile UX fixes
-  * Marketing reallocation
-* Outputs:
+Funnel metric computation
+Drop-off analysis
+Segment comparison
+Root-cause identification
+Visualization
 
-  * Extra buyers
-  * Incremental revenue
-  * New CVR
+The project includes:
 
-### 🌊 User Flow Sankey
+Funnel charts
+Drop-off visualizations
+Segment comparison plots
+Heatmaps for behavioral analysis
+Key Insights (Sample Output)
+Overall conversion rate is below expected benchmarks
+Highest drop-off occurs between Add to Cart and Checkout
+Mobile users contribute a large share of traffic but convert less than desktop users
+Email channel shows higher conversion efficiency compared to paid advertisements
+Business Impact
 
-* Visualizes:
+The analysis supports actionable decisions such as:
 
-  * Where users continue
-  * Where they drop
-
----
-
-## 📊 Dataset
-
-* **8,000 synthetic users**
-* **17,000+ events**
-* Timeframe: Jan–Jun 2024
-
-### Why synthetic?
-
-The dataset is designed to **mimic real-world behavior**, including:
-
-* Device bias (mobile-heavy traffic, lower CVR)
-* Channel intent differences (email vs paid ads)
-* Age-based conversion patterns
-* Realistic session timelines
-
----
-
-## 🧠 Key Insights (Example Output)
-
-* **Overall CVR:** ~9.6% (vs 14.2% industry benchmark)
-* **Biggest Drop-Off:** Cart → Checkout (~57%)
-* **Mobile CVR:** ~3% vs Desktop ~22%
-* **Best Channel:** Email (~20% CVR)
-* **Worst Channel:** Paid Ads (~4% CVR)
-
----
-
-## 💼 Business Impact
-
-FlowLens doesn’t just analyze — it **drives decisions**:
-
-| Problem           | Action                | Impact          |
-| ----------------- | --------------------- | --------------- |
-| Checkout friction | Enable guest checkout | +5–8% CVR       |
-| Mobile drop-offs  | Improve UX + payments | +8–12% CVR      |
-| Poor ad targeting | Shift to email        | ↓ CAC by 15–20% |
-| Abandoned carts   | Recovery emails       | +3–5% revenue   |
-
----
-
-## 🛠️ Tech Stack
-
-| Layer              | Tools                           |
-| ------------------ | ------------------------------- |
-| Frontend + Backend | Streamlit                       |
-| Data Processing    | Pandas, NumPy                   |
-| Visualization      | Plotly                          |
-| Data Design        | Synthetic behavioral simulation |
-| Styling            | Custom CSS inside Streamlit     |
-
----
-
-## 📁 Project Structure
-
-```
+Reducing checkout friction by enabling guest checkout
+Improving mobile user experience to increase conversion
+Optimizing marketing spend by focusing on high-performing channels
+Recovering abandoned carts through targeted interventions
+Technology Stack
+Data Processing: SQL (SQLite), Pandas, NumPy
+Visualization: Matplotlib, Seaborn
+Application Layer: Streamlit
+Data Generation: Synthetic behavioral simulation
+Project Structure
 flowlens/
-│
-├── app.py                     # Main Streamlit application
+
+├── app.py
+├── analysis.py
 ├── data/
-│   ├── user_events.csv
-│   ├── segment_device.csv
-│   ├── segment_channel.csv
-│   ├── segment_age_group.csv
-│   └── segment_country.csv
-│
-├── generate_data.py           # Synthetic data generator
-├── analysis.py                # Offline analysis scripts
+│   └── user_events.csv
+├── outputs/
+├── generate_data.py
 ├── requirements.txt
 └── README.md
-```
-
----
-
-## ⚙️ How to Run Locally
-
-```bash
+Running the Project
 pip install -r requirements.txt
 streamlit run app.py
-```
+Learning Outcomes
+Applied SQL for structured data extraction and aggregation
+Translated raw event data into business metrics such as conversion rate and drop-off
+Designed dashboards focused on decision-making
+Built an end-to-end analytics workflow combining SQL and Python
+Improved ability to communicate insights in a business context
+Future Enhancements
+Integration with real-time data sources
+Cohort and retention analysis
+A/B testing capabilities
+Advanced user journey tracking
+Secure deployment with authentication
 
----
+Author
 
-## 🧠 What I Learned
-
-* Translating raw event data into **business metrics (CVR, drop-off)**
-* Designing **decision-focused dashboards**
-* Building **interactive analytics apps with Streamlit**
-* Thinking like a **Product/Data Analyst**, not just a coder
-
----
-
-## 🚀 Future Improvements
-
-* Real-time data integration (SQL / APIs)
-* Cohort retention analysis
-* A/B testing module
-* User-level journey tracking
-* Deployment with authentication
-
----
-
-## 💼 Interview Summary
-
-> Built a funnel intelligence platform analyzing 8,000 users across a 5-step journey. Identified a 57% checkout drop-off and a 7× mobile vs desktop conversion gap. Delivered actionable recommendations and a simulation engine to estimate revenue uplift.
-
----
-
-## 👤 Author
-
-**Prajakta**
+Prajakta
 BSc Data Science
-
----
-
-## ⭐ If you found this useful
-
-Star the repo ⭐ and feel free to connect!
