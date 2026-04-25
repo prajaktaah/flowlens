@@ -122,17 +122,7 @@ Data Processing: SQL (SQLite), Pandas, NumPy
 Visualization: Matplotlib, Seaborn
 Application Layer: Streamlit
 Data Generation: Synthetic behavioral simulation
-Project Structure
-flowlens/
 
-├── app.py
-├── analysis.py
-├── data/
-│   └── user_events.csv
-├── outputs/
-├── generate_data.py
-├── requirements.txt
-└── README.md
 Running the Project
 pip install -r requirements.txt
 streamlit run app.py
